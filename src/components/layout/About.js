@@ -31,23 +31,45 @@ class About extends Component {
                 </p>
                 <br />
                 <p className="lead">
-                    Current version: 1.0.3 <br />
-                    Planned features for future versions:
-                    <ul>
-                        <li>Owed feature </li>
-                        <li>Filters & Pagination </li>
-                        <li>
-                            Settings with a new collection (table) tied to user
-                            IDs{" "}
-                        </li>
-                        <li>Statistics </li>
-                        <li>Data Encryption </li>
-                        <li>
-                            Migrating the database from Firebase to MySQL or
-                            MongoDB{" "}
-                        </li>
-                    </ul>
+                    Current version: <span className="text-success">1.1.8</span>{" "}
                 </p>
+                <p className="lead">
+                    Latest Changes:
+                    <br />
+                    Pagination, showing a specific amount of records per page or
+                    showing all records for a chosen month. This can be
+                    configured in the settings menu. The settings are set
+                    locally and are specific to the browser/device used.
+                    <br />
+                </p>
+
+                <ul className="lead">
+                    <li>
+                        Option to toggle the pagination menu aboveor below of
+                        the table, or show both (1.1.8)
+                    </li>
+                    <li>Monthly pagination support (1.1.8)</li>
+                    <li>Pagination added (1.1.6)</li>
+                    <li>Local Settings specific to the device (1.1.5)</li>
+                    <li>Code refactoring (1.1.0)</li>
+                    <li>Owed feature implemented (1.1.0)</li>
+                </ul>
+                <p className="lead">Planned features for future versions:</p>
+                <ul className="lead">
+                    <li>Gestures support to change pages for mobile devices</li>
+                    <li>Monthly payments feature</li>
+                    <li>Filters</li>
+                    <li>
+                        User Account Settings with a new database collection
+                        (table) tied to it
+                    </li>
+                    <li>Major styling rework</li>
+                    <li>Statistics </li>
+                    <li>Data Encryption </li>
+                    <li>
+                        Migrating the database from Firebase to MySQL or MongoDB{" "}
+                    </li>
+                </ul>
                 <Copyright />
             </div>
         );

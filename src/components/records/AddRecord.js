@@ -24,7 +24,7 @@ class AddRecord extends Component {
             minute: ""
         },
         details: "",
-        isOwed: false
+        type: "completed"
     };
 
     onSubmit = e => {
@@ -71,9 +71,21 @@ class AddRecord extends Component {
             newRecord.isExpense = false;
         }
 
+        if (newRecord.type === "owed") {
+            firestore.add({ collection: "records" }, newRecord);
+
+            newRecord.userID = auth.uid;
+            newRecord.type = "completed";
+            newRecord.value = newRecord.value * -1;
+        }
+
         firestore
             .add({ collection: "records" }, newRecord)
             .then(() => history.push("/"));
+    };
+
+    onRecordTypeChange = e => {
+        this.setState({ type: e.target.value });
     };
 
     onChange = e => {
@@ -138,6 +150,60 @@ class AddRecord extends Component {
                                     value={this.state.details}
                                 />
                             </div>
+                            <p>Record Type</p>
+                            <div className="form-row align-items-center">
+                                <div className="form-check form-check-inline col-auto">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="inlineRadioOptions"
+                                        id="recordType0"
+                                        value="completed"
+                                        onChange={this.onRecordTypeChange}
+                                        defaultChecked
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor="recordType0"
+                                    >
+                                        Completed
+                                    </label>
+                                </div>
+                                <div className="form-check form-check-inline col-auto">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="inlineRadioOptions"
+                                        id="recordType1"
+                                        value="owed"
+                                        onChange={this.onRecordTypeChange}
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor="recordType1"
+                                    >
+                                        Owed
+                                    </label>
+                                </div>
+                                <div className="form-check form-check-inline col-auto">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="inlineRadioOptions"
+                                        id="inlineRadio3"
+                                        value="monthly"
+                                        onChange={this.onRecordTypeChange}
+                                        disabled
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor="recordType2"
+                                    >
+                                        Monthly (WIP)
+                                    </label>
+                                </div>
+                            </div>
+                            <br />
                             <input
                                 type="submit"
                                 value="Submit"

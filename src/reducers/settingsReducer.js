@@ -1,18 +1,19 @@
-// import { SETTINGACTIONS } from "../actions/types";
+import { CHANGE_LOCAL_SETTINGS } from "../actions/types";
 
 const initialState = {
-    // Add initial settings
+    recordsPerPage: 10,
+    paginationType: "disabled",
+    paginationLocation: "top"
 };
 
 export default function(state = initialState, action) {
     switch (action.type) {
-        /*
-        case SETTINGACTION:
+        case CHANGE_LOCAL_SETTINGS:
             return {
                 ...state,
-                settingAction: !state.settingAction
+                payload: action.payload
             };
-         */
+
         default:
             return {
                 ...state

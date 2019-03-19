@@ -26,7 +26,9 @@ const rrfConfig = {
 firebase.initializeApp(firebaseConfig);
 // Init firestore
 const firestore = firebase.firestore();
-const firestoreSettings = { timestampsInSnapshots: true };
+const firestoreSettings = {
+    // timestampsInSnapshots: true
+};
 firestore.settings(firestoreSettings);
 // Add reactReduxFirebase enhancer when making store creator
 const createStoreWithFirebase = compose(
@@ -42,8 +44,21 @@ const rootReducer = combineReducers({
     settings: settingsReducer
 });
 
+// Check for settings in localStorage
+if (localStorage.getItem("settings") == null) {
+    // Default settings
+    const defaultSettings = {
+        recordsPerPage: 10,
+        paginationType: "disabled",
+        paginationLocation: "Top"
+    };
+
+    // Set to localStorage
+    localStorage.setItem("settings", JSON.stringify(defaultSettings));
+}
+
 // Create initial state
-const initialState = {};
+const initialState = { settings: JSON.parse(localStorage.getItem("settings")) };
 
 // Create store
 const store = createStoreWithFirebase(

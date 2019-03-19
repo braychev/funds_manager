@@ -41,6 +41,59 @@ class RecordDetails extends Component {
             .then(history.push("/"));
     };
 
+    // Pay Owed Record
+    onPayClick = e => {
+        e.preventDefault();
+
+        const { record, firestore } = this.props;
+
+        const week = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ];
+        const year = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+
+        const dateCreated = {
+            fullDate: new Date().toLocaleString(),
+            day: week[new Date().getDay()],
+            month: year[new Date().getMonth()],
+            dd: new Date().getDate(),
+            mm: new Date().getMonth() + 1,
+            yyyy: new Date().getFullYear(),
+            hour: new Date().getHours(),
+            minute: new Date().getMinutes()
+        };
+
+        const recordUpdate = {
+            type: "completed",
+            dateCreated
+        };
+
+        // Update in Firestore
+        firestore.update(
+            { collection: "records", doc: record.id },
+            recordUpdate
+        );
+    };
+
     onChange = e => this.setState({ [e.target.name]: e.target.value });
 
     render() {
@@ -88,6 +141,14 @@ class RecordDetails extends Component {
                         {auth.uid === record.userID ? (
                             <div className="col-md-6">
                                 <div className="btn-group float-right">
+                                    {record.type !== "completed" ? (
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={this.onPayClick}
+                                        >
+                                            Pay
+                                        </button>
+                                    ) : null}
                                     <Link
                                         to={`/record/edit/${record.id}`}
                                         className="btn btn-dark"
