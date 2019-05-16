@@ -1,28 +1,17 @@
 import React, { Component } from "react";
 import classnames from "classnames";
+import { TIME } from "../../constants/constants";
 
 class Pagination extends Component {
     render() {
         const { recordsPerPage, paginationType } = this.props.settings;
-        const { currentPage, totalRecords } = this.props;
+        const { currentPage, myRecords } = this.props;
+        const totalRecords = myRecords.length;
         const totalPages =
             paginationType === "pages"
                 ? parseInt(totalRecords / recordsPerPage + 1, 10)
                 : 12;
-        const months = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
-        ];
+        const { monthsShort } = TIME;
         return (
             <React.Fragment>
                 {totalRecords > recordsPerPage ||
@@ -42,10 +31,10 @@ class Pagination extends Component {
                                 <span className="sr-only">Previous</span>
                             </button>
                         </li>
-                        <li className="page-item active d-block d-sm-none">
+                        <li className="page-item active d-block d-md-none">
                             <span className="page-link">
                                 {paginationType === "months"
-                                    ? months[currentPage]
+                                    ? monthsShort[currentPage]
                                     : currentPage + 1}
                             </span>
                         </li>
@@ -54,7 +43,7 @@ class Pagination extends Component {
                             .map((el, i) => (
                                 <li
                                     className={classnames(
-                                        "page-item d-none d-sm-block",
+                                        "page-item d-none d-md-block",
                                         {
                                             active: currentPage === i
                                         }
@@ -68,7 +57,7 @@ class Pagination extends Component {
                                         }
                                     >
                                         {paginationType === "months"
-                                            ? months[i]
+                                            ? monthsShort[i]
                                             : i + 1}
                                     </button>
                                 </li>

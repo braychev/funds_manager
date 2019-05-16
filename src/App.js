@@ -14,6 +14,7 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Settings from "./components/settings/Settings";
 import About from "./components/layout/About";
+import AlertOverlay from "./components/layout/alerts/AlertOverlay";
 
 import "./App.css";
 
@@ -25,6 +26,7 @@ class App extends Component {
                     <div className="App">
                         <AppNavbar />
                         <div className="container">
+                            <AlertOverlay />
                             <Switch>
                                 <Route
                                     exact

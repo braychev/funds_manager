@@ -1,21 +1,19 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { firestoreConnect, firebaseConnect } from "react-redux-firebase";
-import {} from "../../actions/settingsActions";
-import { notifyUser } from "../../actions/notifyActions";
+import { addAlert } from "../../actions/alertActions";
 import { changeLocalSettings } from "../../actions/settingsActions";
-import Alert from "../layout/Alert";
 import WIP from "../layout/WIP.png";
 import Copyright from "../layout/Copyright";
+import BackToDashboard from "../layout/BackToDashboard";
 
 class Settings extends Component {
     settings = JSON.parse(localStorage.getItem("settings"));
 
     state = {
-        alertVisible: false,
+        alertVisible: true,
         localSettings: {
             recordsPerPage: this.settings.recordsPerPage,
             paginationType: this.settings.paginationType,
@@ -23,19 +21,11 @@ class Settings extends Component {
         }
     };
 
-    // Handle Alert
-    handleAlert = timeout => {
-        this.setState({ alertVisible: true });
-        setTimeout(() => {
-            this.setState({ alertVisible: false });
-        }, timeout);
-    };
-
     // Update Database
     onUpdateDBClick = e => {
         e.preventDefault();
 
-        const { records, firestore, notifyUser } = this.props;
+        const { records, firestore, addAlert } = this.props;
 
         const typeUpdate = {
             type: "completed"
@@ -50,8 +40,7 @@ class Settings extends Component {
                 );
             }
         });
-        notifyUser("Database Format Updated", "sucess");
-        this.handleAlert(1500);
+        addAlert("Database Format Updated", "sucess");
     };
 
     onChange = e => {
@@ -85,10 +74,10 @@ class Settings extends Component {
         e.preventDefault();
 
         const { localSettings } = this.state;
-        const { notifyUser, changeLocalSettings } = this.props;
+        const { addAlert, changeLocalSettings } = this.props;
 
-        notifyUser(`Local settings changed!`, "sucess");
-        this.handleAlert(1500);
+        addAlert(`Local settings changed!`, "sucess");
+        localStorage.setItem("settings", JSON.stringify(localSettings));
         changeLocalSettings(localSettings);
     };
 
@@ -98,24 +87,12 @@ class Settings extends Component {
             "1jQSAyQIhtY3xTyg0axukMFGcjl2"
         ];
         const { auth } = this.props;
-        const { message, messageType } = this.props.notify;
-        const { alertVisible, localSettings } = this.state;
+        const { localSettings } = this.state;
 
         // const { actions } = this.props.settings;
         return (
             <div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Link to="/" className="btn btn-link">
-                            <i className="fas fa-arrow-circle-left" /> Back To
-                            Dashboard
-                        </Link>
-                    </div>
-                </div>
-                <hr />
-                {message && alertVisible ? (
-                    <Alert message={message} messageType={messageType} />
-                ) : null}
+                <BackToDashboard />
                 <div>
                     <h4>Local Settings:</h4>
                     <form onSubmit={this.onLocalSubmit}>
@@ -210,8 +187,7 @@ class Settings extends Component {
 
 Settings.propTypes = {
     settings: PropTypes.object.isRequired,
-    notify: PropTypes.object.isRequired,
-    notifyUser: PropTypes.func.isRequired,
+    addAlert: PropTypes.func.isRequired,
     changeLocalSettings: PropTypes.func.isRequired
     // actions: PropTypes.func.isRequired
 };
@@ -226,10 +202,10 @@ export default compose(
         (state, props) => ({
             auth: state.firebase.auth,
             settings: state.settings,
-            notify: state.notify
+            alert: state.alert
         }),
         {
-            notifyUser,
+            addAlert,
             changeLocalSettings
         }
     )

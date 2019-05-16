@@ -7,22 +7,39 @@ import { firestoreConnect, firebaseConnect } from "react-redux-firebase";
 import Spinner from "../layout/Spinner";
 import classnames from "classnames";
 import noPowerHere from "../layout/noPowerHere.webp";
+import { DATE_CREATED } from "../../constants/constants";
+import ValueForm from "../layout/ValueForm";
+import RecordDetailsButtonGroup from "./RecordDetailsButtonGroup";
 
 class RecordDetails extends Component {
     state = {
-        showValueUpdate: false,
-        valueUpdateAmount: ""
+        showUpdateForm: false,
+        showPayForm: false,
+        valueAmount: 0
+    };
+
+    onShowUpdateFormClick = () => {
+        const { record } = this.props;
+        this.setState({ valueAmount: parseFloat(record.value).toFixed(2) });
+        this.setState({ showUpdateForm: !this.state.showUpdateForm });
+    };
+
+    onShowPayFormClick = () => {
+        const { record } = this.props;
+        this.setState({ valueAmount: parseFloat(record.value).toFixed(2) });
+        this.setState({ showPayForm: !this.state.showPayForm });
     };
 
     // Update Value
-    valueSubmit = e => {
+    onValueUpdate = e => {
         e.preventDefault();
 
         const { record, firestore } = this.props;
-        const { valueUpdateAmount } = this.state;
+        const { valueAmount } = this.state;
 
         const recordUpdate = {
-            value: parseFloat(valueUpdateAmount)
+            value: String(valueAmount),
+            isExpense: valueAmount >= 0 ? false : true
         };
 
         // Update in Firestore
@@ -45,90 +62,48 @@ class RecordDetails extends Component {
     onPayClick = e => {
         e.preventDefault();
 
-        const { record, firestore } = this.props;
+        const { valueAmount } = this.state;
+        const { record, firestore, history } = this.props;
+        const dateCreated = DATE_CREATED;
+        const newRecord = { ...record };
+        delete newRecord.id;
 
-        const week = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-        ];
-        const year = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December"
-        ];
+        newRecord.value = String(valueAmount);
+        newRecord.dateCreated = dateCreated;
+        newRecord.type = "completed";
+        delete newRecord.id;
 
-        const dateCreated = {
-            fullDate: new Date().toLocaleString(),
-            day: week[new Date().getDay()],
-            month: year[new Date().getMonth()],
-            dd: new Date().getDate(),
-            mm: new Date().getMonth() + 1,
-            yyyy: new Date().getFullYear(),
-            hour: new Date().getHours(),
-            minute: new Date().getMinutes()
-        };
+        // Create New Record
+        firestore.add({ collection: "records" }, newRecord);
 
+        // Update Current Record
         const recordUpdate = {
-            type: "completed",
-            dateCreated
+            dateCreated,
+            value: String(parseFloat(record.value).toFixed(2) - valueAmount)
         };
 
-        // Update in Firestore
-        firestore.update(
-            { collection: "records", doc: record.id },
-            recordUpdate
-        );
+        if (recordUpdate.value !== "0") {
+            // Update in Firestore
+            firestore.update(
+                { collection: "records", doc: record.id },
+                recordUpdate
+            );
+        } else {
+            firestore
+                .delete({ collection: "records", doc: record.id })
+                .then(history.push("/"));
+        }
     };
 
     onChange = e => this.setState({ [e.target.name]: e.target.value });
 
     render() {
         const { record, auth } = this.props;
-        const { showValueUpdate, valueUpdateAmount } = this.state;
-
-        let valueForm = "";
-        // If value form should display
-        if (showValueUpdate) {
-            valueForm = (
-                <form onSubmit={this.valueSubmit}>
-                    <div className="input-group">
-                        <input
-                            type="number"
-                            className="form-control"
-                            name="valueUpdateAmount"
-                            placeholder="New Value"
-                            value={valueUpdateAmount}
-                            onChange={this.onChange}
-                        />
-                        <div className="input-group-append">
-                            <input
-                                type="submit"
-                                value="Update"
-                                className="btn btn-outline-dark"
-                            />
-                        </div>
-                    </div>
-                </form>
-            );
-        } else {
-            valueForm = null;
-        }
+        const { showUpdateForm, showPayForm, valueAmount } = this.state;
 
         if (record) {
+            const userIsAuthenticated =
+                auth.uid === record.userID ? true : false;
             return (
                 <div>
                     <div className="row">
@@ -138,35 +113,21 @@ class RecordDetails extends Component {
                                 To Dashboard
                             </Link>
                         </div>
-                        {auth.uid === record.userID ? (
-                            <div className="col-md-6">
-                                <div className="btn-group float-right">
-                                    {record.type !== "completed" ? (
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={this.onPayClick}
-                                        >
-                                            Pay
-                                        </button>
-                                    ) : null}
-                                    <Link
-                                        to={`/record/edit/${record.id}`}
-                                        className="btn btn-dark"
-                                    >
-                                        Edit
-                                    </Link>
-                                    <button
-                                        className="btn btn-danger"
-                                        onClick={this.onDeleteClick}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
+                        {userIsAuthenticated ? (
+                            <RecordDetailsButtonGroup
+                                record={record}
+                                showUpdateForm={showUpdateForm}
+                                showPayForm={showPayForm}
+                                valueAmount={valueAmount}
+                                onShowPayFormClick={this.onShowPayFormClick}
+                                onPayClick={this.onPayClick}
+                                onDeleteClick={this.onDeleteClick}
+                                onChange={this.onChange}
+                            />
                         ) : null}
                     </div>
                     <hr />
-                    {auth.uid === record.userID ? (
+                    {userIsAuthenticated ? (
                         <div className="card">
                             <h3 className="card-header">{record.entry}</h3>
                             <div className="card-body">
@@ -179,7 +140,7 @@ class RecordDetails extends Component {
                                             </span>{" "}
                                         </h4>
                                     </div>
-                                    <div className="col-md-4 col-sm-6">
+                                    <div className="col-md-4 col-sm-6 text-right">
                                         <h4 className="pull-right">
                                             Value:{" "}
                                             <span
@@ -198,19 +159,24 @@ class RecordDetails extends Component {
                                                 {" "}
                                                 <a
                                                     href="#!"
-                                                    onClick={() =>
-                                                        this.setState({
-                                                            showValueUpdate: !this
-                                                                .state
-                                                                .showValueUpdate
-                                                        })
+                                                    value="showUpdateForm"
+                                                    onClick={
+                                                        this
+                                                            .onShowUpdateFormClick
                                                     }
                                                 >
                                                     <i className="fas fa-pencil-alt" />
                                                 </a>
                                             </small>
                                         </h4>
-                                        {valueForm}
+                                        {showUpdateForm ? (
+                                            <ValueForm
+                                                onSubmit={this.onValueUpdate}
+                                                valueAmount={valueAmount}
+                                                onChange={this.onChange}
+                                                buttonText="Update"
+                                            />
+                                        ) : null}
                                     </div>
                                 </div>
                                 <hr />

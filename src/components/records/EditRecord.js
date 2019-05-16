@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { firestoreConnect, firebaseConnect } from "react-redux-firebase";
 import Spinner from "../layout/Spinner";
 import noPowerHere from "../layout/noPowerHere.webp";
+import BackToDashboard from "../layout/BackToDashboard";
 
 class EditRecord extends Component {
     constructor(props) {
@@ -30,7 +30,8 @@ class EditRecord extends Component {
                 this.valueInput.current.value === ""
                     ? 0
                     : this.valueInput.current.value,
-            details: this.detailsInput.current.value
+            details: this.detailsInput.current.value,
+            isExpense: this.valueInput.current.value >= 0 ? false : true
         };
 
         // Update record in firestore
@@ -45,14 +46,7 @@ class EditRecord extends Component {
         if (record) {
             return (
                 <div>
-                    <div className="row">
-                        <div className="col-md-6">
-                            <Link to="/" className="btn btn-link">
-                                <i className="fas fa-arrow-circle-left" /> Back
-                                To Dashboard
-                            </Link>
-                        </div>
-                    </div>
+                    <BackToDashboard />
                     {auth.uid === record.userID ? (
                         <div className="card">
                             <div className="card-header">Edit Record</div>

@@ -1,20 +1,12 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import Copyright from "./Copyright";
+import BackToDashboard from "./BackToDashboard";
 
 class About extends Component {
     render() {
         return (
             <div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Link to="/" className="btn btn-link">
-                            <i className="fas fa-arrow-circle-left" /> Back To
-                            Dashboard
-                        </Link>
-                    </div>
-                </div>
-                <hr />
+                <BackToDashboard />
                 <p className="lead">
                     This is an application I have created for myself to help me
                     keep track of my spendings and funds, but it can be used
@@ -31,28 +23,33 @@ class About extends Component {
                 </p>
                 <br />
                 <p className="lead">
-                    Current version: <span className="text-success">1.1.8</span>{" "}
+                    Current version: <span className="text-success">1.2</span>{" "}
                 </p>
                 <p className="lead">
                     Latest Changes:
                     <br />
-                    Pagination, showing a specific amount of records per page or
-                    showing all records for a chosen month. This can be
-                    configured in the settings menu. The settings are set
-                    locally and are specific to the browser/device used.
+                    Major code refactoring pass and bugfixes. Some layout
+                    changes. Users can now pay/receive partial sums of owed
+                    funds and create completed transactions with the reversed
+                    value of owed funds (useful for loans).
                     <br />
                 </p>
 
                 <ul className="lead">
+                    <li>Layout changes (1.2)</li>
+                    <li>Partial owed payments (1.2)</li>
+                    <li>Duplicate owed value feature (1.2)</li>
+                    <li>Major Code Refactoring (1.2)</li>
+                    <li>Reworked Alert System (1.2)</li>
                     <li>
-                        Option to toggle the pagination menu aboveor below of
+                        Option to toggle the pagination menu above or below of
                         the table, or show both (1.1.8)
                     </li>
                     <li>Monthly pagination support (1.1.8)</li>
                     <li>Pagination added (1.1.6)</li>
                     <li>Local Settings specific to the device (1.1.5)</li>
-                    <li>Code refactoring (1.1.0)</li>
-                    <li>Owed feature implemented (1.1.0)</li>
+                    <li>Code refactoring (1.1)</li>
+                    <li>Owed feature implemented (1.1)</li>
                 </ul>
                 <p className="lead">Planned features for future versions:</p>
                 <ul className="lead">

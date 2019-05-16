@@ -1,108 +1,86 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { firestoreConnect, firebaseConnect } from "react-redux-firebase";
+import BackToDashboard from "../layout/BackToDashboard";
+import { DATE_CREATED } from "../../constants/constants";
 
 class AddRecord extends Component {
     state = {
-        entry: "",
-        category: "",
-        excludeStatistics: true,
-        isExpense: true,
-        userID: "",
-        value: "",
-        dateCreated: {
-            fullDate: "",
-            day: "",
-            month: "",
-            dd: "",
-            mm: "",
-            yyyy: "",
-            hour: "",
-            minute: ""
+        record: {
+            entry: "",
+            category: "",
+            excludeStatistics: true,
+            isExpense: true,
+            userID: "",
+            value: "",
+            dateCreated: {
+                fullDate: "",
+                day: "",
+                month: "",
+                dd: "",
+                mm: "",
+                yyyy: "",
+                hour: "",
+                minute: ""
+            },
+            details: "",
+            type: "completed"
         },
-        details: "",
-        type: "completed"
+        duplicateValue: false
     };
 
     onSubmit = e => {
         e.preventDefault();
 
-        const newRecord = this.state;
-        const week = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-        ];
-        const year = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December"
-        ];
+        const newRecord = this.state.record;
+        const { duplicateValue } = this.state;
 
         const { firestore, history, auth } = this.props;
 
         newRecord.userID = auth.uid;
-        newRecord.dateCreated.fullDate = new Date().toLocaleString();
-        newRecord.dateCreated.day = week[new Date().getDay()];
-        newRecord.dateCreated.month = year[new Date().getMonth()];
-        newRecord.dateCreated.dd = new Date().getDate();
-        newRecord.dateCreated.mm = new Date().getMonth() + 1; //January is 0
-        newRecord.dateCreated.yyyy = new Date().getFullYear();
-        newRecord.dateCreated.hour = new Date().getHours();
-        newRecord.dateCreated.minute = new Date().getMinutes();
+        newRecord.dateCreated = DATE_CREATED;
 
-        if (newRecord.value > 0) {
+        if (newRecord.value >= 0) {
             newRecord.isExpense = false;
-        }
-
-        if (newRecord.type === "owed") {
-            firestore.add({ collection: "records" }, newRecord);
-
-            newRecord.userID = auth.uid;
-            newRecord.type = "completed";
-            newRecord.value = newRecord.value * -1;
         }
 
         firestore
             .add({ collection: "records" }, newRecord)
             .then(() => history.push("/"));
-    };
 
-    onRecordTypeChange = e => {
-        this.setState({ type: e.target.value });
+        if (newRecord.type === "owed" && duplicateValue === true) {
+            newRecord.type = "completed";
+            newRecord.value = String(newRecord.value * -1);
+            firestore.add({ collection: "records" }, newRecord);
+        }
     };
 
     onChange = e => {
-        this.setState({ [e.target.name]: e.target.value });
+        this.setState({
+            [e.target.name]:
+                e.target.type === "checkbox" ? e.target.checked : e.target.value
+        });
+    };
+
+    onRecordChange = e => {
+        this.setState({
+            record: {
+                ...this.state.record,
+                [e.target.name]:
+                    e.target.type === "checkbox"
+                        ? e.target.checked
+                        : e.target.value
+            }
+        });
     };
 
     render() {
+        const { record, duplicateValue } = this.state;
         return (
             <div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Link to="/" className="btn btn-link">
-                            <i className="fas fa-arrow-circle-left" /> Back To
-                            Dashboard
-                        </Link>
-                    </div>
-                </div>
+                <BackToDashboard />
                 <div className="card">
                     <div className="card-header">Add Record</div>
                     <div className="card-body">
@@ -115,8 +93,8 @@ class AddRecord extends Component {
                                     name="entry"
                                     minLength="2"
                                     required
-                                    onChange={this.onChange}
-                                    value={this.state.entry}
+                                    onChange={this.onRecordChange}
+                                    value={record.entry}
                                 />
                             </div>
                             <div className="form-group">
@@ -125,8 +103,8 @@ class AddRecord extends Component {
                                     type="text"
                                     className="form-control"
                                     name="category"
-                                    onChange={this.onChange}
-                                    value={this.state.category}
+                                    onChange={this.onRecordChange}
+                                    value={record.category}
                                 />
                             </div>
                             <div className="form-group">
@@ -136,8 +114,8 @@ class AddRecord extends Component {
                                     className="form-control"
                                     name="value"
                                     required
-                                    onChange={this.onChange}
-                                    value={this.state.value}
+                                    onChange={this.onRecordChange}
+                                    value={record.value}
                                 />
                             </div>
                             <div className="form-group">
@@ -146,8 +124,8 @@ class AddRecord extends Component {
                                     type="textarea"
                                     className="form-control"
                                     name="details"
-                                    onChange={this.onChange}
-                                    value={this.state.details}
+                                    onChange={this.onRecordChange}
+                                    value={record.details}
                                 />
                             </div>
                             <p>Record Type</p>
@@ -156,10 +134,10 @@ class AddRecord extends Component {
                                     <input
                                         className="form-check-input"
                                         type="radio"
-                                        name="inlineRadioOptions"
+                                        name="type"
                                         id="recordType0"
                                         value="completed"
-                                        onChange={this.onRecordTypeChange}
+                                        onChange={this.onRecordChange}
                                         defaultChecked
                                     />
                                     <label
@@ -173,10 +151,10 @@ class AddRecord extends Component {
                                     <input
                                         className="form-check-input"
                                         type="radio"
-                                        name="inlineRadioOptions"
+                                        name="type"
                                         id="recordType1"
                                         value="owed"
-                                        onChange={this.onRecordTypeChange}
+                                        onChange={this.onRecordChange}
                                     />
                                     <label
                                         className="form-check-label"
@@ -189,10 +167,10 @@ class AddRecord extends Component {
                                     <input
                                         className="form-check-input"
                                         type="radio"
-                                        name="inlineRadioOptions"
-                                        id="inlineRadio3"
+                                        name="type"
+                                        id="recordType2"
                                         value="monthly"
-                                        onChange={this.onRecordTypeChange}
+                                        onChange={this.onRecordChange}
                                         disabled
                                     />
                                     <label
@@ -203,6 +181,26 @@ class AddRecord extends Component {
                                     </label>
                                 </div>
                             </div>
+                            {record.type === "owed" ? (
+                                <div className="form-check">
+                                    <hr />
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        name="duplicateValue"
+                                        checked={duplicateValue}
+                                        id="duplicateCheck"
+                                        onChange={this.onChange}
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor="duplicateCheck"
+                                    >
+                                        Duplicate Payment
+                                    </label>
+                                    <hr />
+                                </div>
+                            ) : null}
                             <br />
                             <input
                                 type="submit"
