@@ -40,7 +40,7 @@ class AddRecord extends Component {
         const { firestore, history, auth } = this.props;
 
         newRecord.userID = auth.uid;
-        newRecord.dateCreated = DATE_CREATED;
+        newRecord.dateCreated = DATE_CREATED();
 
         if (newRecord.value >= 0) {
             newRecord.isExpense = false;

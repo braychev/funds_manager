@@ -64,12 +64,12 @@ class RecordDetails extends Component {
 
         const { valueAmount } = this.state;
         const { record, firestore, history } = this.props;
-        const dateCreated = DATE_CREATED;
+        const dateCreated = DATE_CREATED();
         const newRecord = { ...record };
         delete newRecord.id;
 
         newRecord.value = String(valueAmount);
-        newRecord.dateCreated = dateCreated;
+        newRecord.dateCreated = DATE_CREATED();
         newRecord.type = "completed";
         delete newRecord.id;
 
